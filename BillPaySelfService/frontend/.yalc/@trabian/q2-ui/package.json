@@ -1,0 +1,47 @@
+{
+  "version": "0.1.4+b56cc1f1",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "postinstall": "patch-package",
+    "prepare": "tsdx build --transpileOnly",
+    "storybook": "start-storybook -p 23796",
+    "build-storybook": "build-storybook",
+    "playroom:start": "playroom start",
+    "playroom:build": "playroom build",
+    "yalc:push": "yalc push --changed --no-force",
+    "yalc:watch": "nodemon --watch src -e js,ts,tsx -x 'yalc push --changed --no-force'"
+  },
+  "peerDependencies": {
+    "q2-tecton-sdk": ">=0.37.2",
+    "react": ">=16"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "name": "@trabian/q2-ui",
+  "author": "Matt Dean",
+  "module": "dist/q2-ui.esm.js",
+  "dependencies": {
+    "@reach/auto-id": "^0.11.2",
+    "@styled-system/should-forward-prop": "^5.1.4",
+    "@use-it/event-listener": "^0.1.3",
+    "classnames": "^2.2.6",
+    "numeral": "^2.0.6",
+    "patch-package": "^6.2.1",
+    "stylis-plugin-extra-scope": "^0.2.1",
+    "theme-ui": "^0.3.1"
+  },
+  "yalcSig": "b56cc1f18a20cf254d6f6fa15a44f355"
+}

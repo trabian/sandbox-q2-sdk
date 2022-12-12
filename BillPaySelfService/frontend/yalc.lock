@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "@trabian/q2-ui": {
+      "signature": "b56cc1f18a20cf254d6f6fa15a44f355",
+      "file": true
+    }
+  }
+}

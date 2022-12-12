@@ -4,16 +4,14 @@ from q2_sdk.core.default_settings import *
 # To override any defaults, simply redefine them below.
 # Some commonly overridden values are commented out below
 
-INSTALLED_EXTENSIONS = [
-    # "your_extension_here"
-]
+INSTALLED_EXTENSIONS = ["BillPaySelfService"]
 
 # If you make a custom core (q2 create_coreflow), add the path here
 # to be discoverable for use with DYNAMIC_CORE_SELECTION
-#CUSTOM_CORES = {
+# CUSTOM_CORES = {
 #    'CoreName': 'module_path_that_contains_Core_object',
 #    'FooCore': 'FooCore.extension'
-#}
+# }
 
 # Uncomment this line to define your own logging.conf location
 # LOGGING_CONF = os.path.abspath('./logging.conf')
@@ -34,3 +32,5 @@ CORE = None
 # CORE = 'q2_cores.Symitar'
 
 USE_SCSS = False
+
+COMPANY = "Trabian"

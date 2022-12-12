@@ -1,0 +1,34 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "echo Frontend testing not configured",
+    "test-cov": "echo Frontend testing coverage not configured",
+    "lint": "echo Frontend linting not configured",
+    "build": "parcel build --no-content-hash src/index.tsx",
+    "dev": "parcel watch --public-url '.' src/index.tsx --hmr-port=3212"
+  },
+  "dependencies": {
+    "@trabian/q2-ui": "file:.yalc/@trabian/q2-ui",
+    "date-fns": "^2.29.3",
+    "q2-tecton-sdk": "^0.40.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-hook-form": "7.22.5",
+    "react-scripts": "5.0.0",
+    "theme-ui": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.56",
+    "@types/react-dom": "^16.9.9",
+    "@types/theme-ui": "^0.3.7",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^4.0.5",
+    "yalc": "^1.0.0-pre.50"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}
