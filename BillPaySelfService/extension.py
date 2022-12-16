@@ -186,14 +186,14 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
                 # Get Already linked BillPay External ID if exists
                 external_id = await self.get_third_party_data(
-                    "bp_external_id", line.get("UserID")
+                    self.tpds_external_id, line.get("UserID")
                 )
                 if external_id is not None:
                     line["bpExternalID"] = external_id
 
                 # Get Already linked BillPay Subscriber ID if exists
                 subscriber_id = await self.get_third_party_data(
-                    "bp_subscriber_id", line.get("UserID")
+                    self.tpds_subscriber_id, line.get("UserID")
                 )
                 if subscriber_id is not None:
                     line["bpSubscriberID"] = subscriber_id
