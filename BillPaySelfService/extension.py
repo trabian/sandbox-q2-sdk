@@ -20,6 +20,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             DbConfig("external_id_alias", "Session.UserName"),
             DbConfig("subscriber_id_alias", "Session.ExternalSubscriberID"),
             DbConfig("vendor_name", "BillPayment.CheckFreeVariables"),
+            DbConfig("vendor_id", "42"),
             DbConfig("vendor_group_id", "1"),
         ]
     )
@@ -48,16 +49,20 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
         return router
 
     @property
-    def tpds_subscriber_id(self):
+    def tpds_external_id(self):
         return self.db_config["external_id_alias"]
 
     @property
-    def tpds_external_id(self):
+    def tpds_subscriber_id(self):
         return self.db_config["subscriber_id_alias"]
 
     @property
     def tpds_vendor_name(self):
         return self.db_config["vendor_name"]
+
+    @property
+    def tpds_vendor_id(self):
+        return self.db_config["vendor_id"]
 
     @property
     def tpds_group_id(self):
@@ -91,7 +96,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
     async def get_third_party_data(self, name, user_id):
         try:
-            vendor_name = self.tpds_vendor_name
+            vendor_id = self.tpds_vendor_id
             group_id = self.tpds_group_id
         except Exception as error:
             traceback.print_exc()
@@ -99,7 +104,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
         tpd = ThirdPartyDataShared(self.logger)
         tpd_list = await tpd.get(
-            user_id=user_id, vendor_name=vendor_name, group_id=group_id
+            user_id=user_id, vendor_id=vendor_id, group_id=group_id
         )
 
         for tpd in tpd_list:
@@ -186,14 +191,14 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
                 # Get Already linked BillPay External ID if exists
                 external_id = await self.get_third_party_data(
-                    "bp_external_id", line.get("UserID")
+                    self.tpds_external_id, line.get("UserID")
                 )
                 if external_id is not None:
                     line["bpExternalID"] = external_id
 
                 # Get Already linked BillPay Subscriber ID if exists
                 subscriber_id = await self.get_third_party_data(
-                    "bp_subscriber_id", line.get("UserID")
+                    self.tpds_subscriber_id, line.get("UserID")
                 )
                 if subscriber_id is not None:
                     line["bpSubscriberID"] = subscriber_id
@@ -220,11 +225,11 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             if user_id == "" or user_id is None:
                 raise Exception("Invalid Q2 User ID")
 
-            external_id = str(self.form_fields.get(self.tpds_external_id))
+            external_id = str(self.form_fields.get("bp_external_id"))
             if external_id is None:
                 raise Exception("Invalid BillPay External User Id")
 
-            subscriber_id = str(self.form_fields.get(self.tpds_subscriber_id))
+            subscriber_id = str(self.form_fields.get("bp_subscriber_id"))
             if subscriber_id is None:
                 raise Exception("Invalid BillPay Subscriber User Id")
 
