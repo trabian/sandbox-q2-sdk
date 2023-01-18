@@ -6,6 +6,7 @@ import time
 import traceback
 from q2_sdk.core.http_handlers.central_handler import Q2CentralRequestHandler
 from q2_sdk.hq.db.third_party_data_shared import ThirdPartyDataShared
+from q2_sdk.hq.db.third_party_data import ThirdPartyData
 from q2_sdk.hq.models.db_config.db_config_list import DbConfigList
 from q2_sdk.hq.models.db_config.db_config import DbConfig
 from .install.db_plan import DbPlan
@@ -19,7 +20,8 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
         [
             DbConfig("external_id_alias", "Session.UserName"),
             DbConfig("subscriber_id_alias", "Session.ExternalSubscriberID"),
-            DbConfig("vendor_name", "BillPayment.CheckFreeVariables"),
+            DbConfig("tpds_vendor_name", "BillPayment.CheckFreeVariables"),
+            DbConfig("tpd_vendor_name", "BillPayment.CheckFreeVariables"),
             DbConfig("vendor_id", "42"),
             DbConfig("vendor_group_id", "1"),
         ]
@@ -58,7 +60,11 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
     @property
     def tpds_vendor_name(self):
-        return self.db_config["vendor_name"]
+        return self.db_config["tpds_vendor_name"]
+
+    @property
+    def tpd_vendor_name(self):
+        return self.db_config["tpd_vendor_name"]
 
     @property
     def tpds_vendor_id(self):
@@ -68,7 +74,9 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
     def tpds_group_id(self):
         return self.db_config["vendor_group_id"]
 
-    async def create_third_party_data(self, name, user_id, value):
+    # THIRD PARTY DATA SHARED
+
+    async def create_third_party_data_shared(self, name, user_id, value):
         tpd = ThirdPartyDataShared(self.logger)
 
         vendor_name = self.tpds_vendor_name
@@ -81,7 +89,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
         )
         return response
 
-    async def update_third_party_data(self, name, user_id, value):
+    async def update_third_party_data_shared(self, name, user_id, value):
         tpd = ThirdPartyDataShared(self.logger)
 
         vendor_name = self.tpds_vendor_name
@@ -94,7 +102,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
         )
         return response
 
-    async def get_third_party_data(self, name, user_id):
+    async def get_third_party_data_shared(self, name, user_id):
         try:
             vendor_id = self.tpds_vendor_id
             group_id = self.tpds_group_id
@@ -106,6 +114,76 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
         tpd_list = await tpd.get(
             user_id=user_id, vendor_id=vendor_id, group_id=group_id
         )
+
+        for tpd in tpd_list:
+            if tpd.Name.text == name:
+                return tpd.DataValue.pyval
+
+        return None
+
+    async def update_or_initialize_tpds(self, name, user_id, value):
+        try:
+            existing_data = await self.get_third_party_data_shared(name, user_id)
+
+            if existing_data is not None:
+                # update
+                self.logger.debug(
+                    f"Found existing {name} in ThirdPartDataShared: {existing_data}"
+                )
+                update_response = await self.update_third_party_data_shared(
+                    name, user_id, value
+                )
+                return update_response
+
+            # initialize
+            create_response = await self.create_third_party_data_shared(
+                name, user_id, value
+            )
+            self.logger.debug(f"Created new {name} in ThirdPartDataShared: {value}")
+            return create_response
+        except Exception as error:
+            traceback.print_exc()
+            raise error
+
+    # END OF THIRD PARTY DATA SHARED
+
+    # THIRD PARTY DATA
+
+    async def create_third_party_data(self, name, user_id, value):
+        tpd = ThirdPartyData(self.logger)
+
+        vendor_name = self.tpd_vendor_name
+
+        response = await tpd.create(
+            user_id=user_id,
+            vendor_name=vendor_name,
+            data_name=name,
+            data_value=value,
+        )
+        return response
+
+    async def update_third_party_data(self, name, user_id, value):
+        tpd = ThirdPartyData(self.logger)
+
+        vendor_name = self.tpd_vendor_name
+
+        response = await tpd.update(
+            user_id=user_id,
+            vendor_name=vendor_name,
+            data_name=name,
+            data_value=value,
+        )
+        return response
+
+    async def get_third_party_data(self, name, user_id):
+        try:
+            vendor_name = self.tpd_vendor_name
+        except Exception as error:
+            traceback.print_exc()
+            raise Exception(f"No vendor name set - {error}") from error
+
+        tpd = ThirdPartyData(self.logger)
+        tpd_list = await tpd.get(user_id=user_id, vendor_name=vendor_name)
 
         for tpd in tpd_list:
             if tpd.Name.text == name:
@@ -135,19 +213,30 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             traceback.print_exc()
             raise error
 
+    # END OF THIRD PARTY DATA
+
     async def save_link_to_db(self, name, user_id, new_value=None):
 
         try:
+            await self.update_or_initialize_tpds(
+                name=name, user_id=user_id, value=new_value
+            )
+            self.logger.debug(f"New value in ThirdPartyDataShared is {new_value}")
+
             await self.update_or_initialize_tpd(
                 name=name, user_id=user_id, value=new_value
             )
-            self.logger.debug(f"New value is {new_value}")
+            self.logger.debug(f"New value in ThirdPartyData is {new_value}")
         except Exception as error:
             traceback.print_exc()
-            self.logger.error(f"Failed to add or update {name} link. : {str(error)}")
+            self.logger.error(
+                f"Failed to add or update {name} link in either TPD or TPDS. : {str(error)}"
+            )
             return False
         else:
-            self.logger.debug(f"Successfully added or updated {name} link")
+            self.logger.debug(
+                f"Successfully added or updated {name} link in both TPD and TPDS"
+            )
             return True
 
     async def default(self):
@@ -189,19 +278,42 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
                 row = user_response[0]
                 line = dict(zip(columns, (row.find(column).text for column in columns)))
 
-                # Get Already linked BillPay External ID if exists
-                external_id = await self.get_third_party_data(
+                # Get Already linked BillPay External ID if exists IN TPDS
+                tpds_external_id = await self.get_third_party_data_shared(
                     self.tpds_external_id, line.get("UserID")
                 )
-                if external_id is not None:
-                    line["bpExternalID"] = external_id
 
-                # Get Already linked BillPay Subscriber ID if exists
-                subscriber_id = await self.get_third_party_data(
+                # Get Already linked BillPay External ID if exists IN TPD
+                tpd_external_id = await self.get_third_party_data(
+                    self.tpds_external_id, line.get("UserID")
+                )
+
+                if tpds_external_id is not None and tpd_external_id is not None:
+                    self.logger.info("TPDS External ID: %s", tpds_external_id)
+                    self.logger.info("TPD External ID: %s", tpd_external_id)
+                    if tpds_external_id == tpd_external_id:
+                        line["bpExternalID"] = tpds_external_id
+                    else:
+                        line["bpExternalID"] = ""
+                        self.logger.info("Mismatch in data between TPD and TPDS")
+
+                # Get Already linked BillPay Subscriber ID if exists IN TPDS
+                tpds_subscriber_id = await self.get_third_party_data_shared(
                     self.tpds_subscriber_id, line.get("UserID")
                 )
-                if subscriber_id is not None:
-                    line["bpSubscriberID"] = subscriber_id
+
+                # Get Already linked BillPay Subscriber ID if exists IN TPD
+                tpd_subscriber_id = await self.get_third_party_data(
+                    self.tpds_subscriber_id, line.get("UserID")
+                )
+                if tpds_subscriber_id is not None and tpd_subscriber_id is not None:
+                    self.logger.info("TPDS External ID: %s", tpds_subscriber_id)
+                    self.logger.info("TPD External ID: %s", tpd_subscriber_id)
+                    if tpds_subscriber_id == tpd_subscriber_id:
+                        line["bpSubscriberID"] = tpds_subscriber_id
+                    else:
+                        line["bpSubscriberID"] = ""
+                        self.logger.info("Mismatch in data between TPD and TPDS")
 
             else:
                 return json.dumps({"success": False, "error": "User does not exist"})
