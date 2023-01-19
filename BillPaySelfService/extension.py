@@ -22,8 +22,8 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             DbConfig("subscriber_id_alias", "Session.ExternalSubscriberID"),
             DbConfig("tpds_vendor_name", "BillPayment.CheckFreeVariables"),
             DbConfig("tpd_vendor_name", "BillPayment.CheckFreeVariables"),
-            DbConfig("vendor_id", "42"),
-            DbConfig("vendor_group_id", "1"),
+            DbConfig("tpds_vendor_id", "42"),
+            DbConfig("tpds_vendor_group_id", "1"),
         ]
     )
 
@@ -68,11 +68,11 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
     @property
     def tpds_vendor_id(self):
-        return self.db_config["vendor_id"]
+        return self.db_config["tpds_vendor_id"]
 
     @property
     def tpds_group_id(self):
-        return self.db_config["vendor_group_id"]
+        return self.db_config["tpds_vendor_group_id"]
 
     # THIRD PARTY DATA SHARED
 
@@ -128,7 +128,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             if existing_data is not None:
                 # update
                 self.logger.debug(
-                    f"Found existing {name} in ThirdPartDataShared: {existing_data}"
+                    f"Found existing {name} in ThirdPartyDataShared: {existing_data}"
                 )
                 update_response = await self.update_third_party_data_shared(
                     name, user_id, value
@@ -139,7 +139,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             create_response = await self.create_third_party_data_shared(
                 name, user_id, value
             )
-            self.logger.debug(f"Created new {name} in ThirdPartDataShared: {value}")
+            self.logger.debug(f"Created new {name} in ThirdPartyDataShared: {value}")
             return create_response
         except Exception as error:
             traceback.print_exc()
@@ -198,7 +198,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
             if existing_data is not None:
                 # update
                 self.logger.debug(
-                    f"Found existing {name} in ThirdPartData: {existing_data}"
+                    f"Found existing {name} in ThirdPartyData: {existing_data}"
                 )
                 update_response = await self.update_third_party_data(
                     name, user_id, value
@@ -207,7 +207,7 @@ class BillPaySelfServiceHandler(Q2CentralRequestHandler):
 
             # initialize
             create_response = await self.create_third_party_data(name, user_id, value)
-            self.logger.debug(f"Created new {name} in ThirdPartData: {value}")
+            self.logger.debug(f"Created new {name} in ThirdPartyData: {value}")
             return create_response
         except Exception as error:
             traceback.print_exc()
