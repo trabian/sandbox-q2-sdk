@@ -142,7 +142,7 @@ export const App: FC<AppProps> = () => {
         var response_string = await response.json();
 
         if (response_string.success) {
-            setSuccess("Successfully linked BillPay IDs! " + " -- " + format(new Date(), "PPpp"))
+            setSuccess("The Subscriber ID and External ID for BillPay have been successfully submitted! " + " -- " + format(new Date(), "PPpp"))
             setSearchResponse(null)
             reset()
 
@@ -338,7 +338,7 @@ export const App: FC<AppProps> = () => {
 
                 {success && error == null ? <div className="q2-row" >
                     <q2-message type="success" appearance="standard">
-                        This is your message {success}
+                        {success}
                     </q2-message>
                 </div> : null}
                 {error ? <div className="q2-row" >
