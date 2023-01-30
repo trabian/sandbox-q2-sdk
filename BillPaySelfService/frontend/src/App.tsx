@@ -253,12 +253,12 @@ export const App: FC<AppProps> = () => {
                                         {searchResponse ? <span sx={{ fontSize: '17px', textAlign: 'left' }}>{searchResponse.UserID}</span> : null}
                                     </div>
                                     <div sx={{ display: 'flex', justifyContent: 'start', alignItems: 'baseline', width: '100%' }}>
-                                        <span sx={{ fontWeight: '600', color: '#555', fontSize: '17px', mr: '10px', width: '200px', flex: '0 0 auto', whiteSpace: 'nowrap' }}>BillPay External ID:</span>
-                                        {searchResponse ? <span sx={{ fontSize: '17px', textAlign: 'left' }}>{searchResponse.bpExternalID}</span> : null}
-                                    </div>
-                                    <div sx={{ display: 'flex', justifyContent: 'start', alignItems: 'baseline', width: '100%' }}>
                                         <span sx={{ fontWeight: '600', color: '#555', fontSize: '17px', mr: '10px', width: '200px', flex: '0 0 auto', whiteSpace: 'nowrap' }}>BillPay Subscriber ID:</span>
                                         {searchResponse ? <span sx={{ fontSize: '17px', textAlign: 'left' }}>{searchResponse.bpSubscriberID}</span> : null}
+                                    </div>
+                                    <div sx={{ display: 'flex', justifyContent: 'start', alignItems: 'baseline', width: '100%' }}>
+                                        <span sx={{ fontWeight: '600', color: '#555', fontSize: '17px', mr: '10px', width: '200px', flex: '0 0 auto', whiteSpace: 'nowrap' }}>BillPay External ID:</span>
+                                        {searchResponse ? <span sx={{ fontSize: '17px', textAlign: 'left' }}>{searchResponse.bpExternalID}</span> : null}
                                     </div>
                                 </div>
 
@@ -272,27 +272,6 @@ export const App: FC<AppProps> = () => {
                             </div>
                             <div className="q2-row">
                                 <div className="q2-col xs-12 sm-6">
-                                    <div>
-                                        <Label
-                                            htmlFor={"bpExternalId"}
-                                            sx={{ mb: 0, p: 0 }}
-                                        >
-                                            BillPay External ID
-                                        </Label>
-                                        <Controller
-                                            name="bpExternalId"
-                                            control={control}
-                                            render={({
-                                                field
-                                            }) => {
-
-                                                return (
-                                                    <Input {...field} ref={field.ref} style={{ marginTop: '0px' }} />
-                                                )
-                                            }
-                                            }
-                                        />
-                                    </div>
                                     <div>
                                         <Label
                                             htmlFor={"bpSubscriberId"}
@@ -314,6 +293,28 @@ export const App: FC<AppProps> = () => {
                                             }
                                         />
                                     </div>
+                                    <div>
+                                        <Label
+                                            htmlFor={"bpExternalId"}
+                                            sx={{ mb: 0, p: 0 }}
+                                        >
+                                            BillPay External ID
+                                        </Label>
+                                        <Controller
+                                            name="bpExternalId"
+                                            control={control}
+                                            render={({
+                                                field
+                                            }) => {
+
+                                                return (
+                                                    <Input {...field} ref={field.ref} style={{ marginTop: '0px' }} />
+                                                )
+                                            }
+                                            }
+                                        />
+                                    </div>
+
                                 </div>
                             </div>
                             <div className="q2-row">
