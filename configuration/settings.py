@@ -4,7 +4,7 @@ from q2_sdk.core.default_settings import *
 # To override any defaults, simply redefine them below.
 # Some commonly overridden values are commented out below
 
-INSTALLED_EXTENSIONS = ["BillPaySelfService"]
+INSTALLED_EXTENSIONS = []
 
 # If you make a custom core (q2 create_coreflow), add the path here
 # to be discoverable for use with DYNAMIC_CORE_SELECTION
